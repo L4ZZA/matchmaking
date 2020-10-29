@@ -7,8 +7,8 @@ import (
 	"time"
 )
 
-// Hello returns a greeting for the named person.
-func Hello(name string) (string, error) {
+// Server returns a greeting for the named person.
+func Server(name string) (string, error) {
 	// If no name was given, return an error with a message.
 	if name == "" {
 		return "", errors.New("empty name")
@@ -20,15 +20,15 @@ func Hello(name string) (string, error) {
 	return message, nil
 }
 
-func Hellos(names []string) (map[string]string, error) {
+func Servers(names []string) (map[string]string, error) {
 
 	// A map to associate names with messages.
 	messages := make(map[string]string)
 
 	// Loop through the received slice of names, calling
-	// the Hello function to get a message for each name.
+	// the Server function to get a message for each name.
 	for _, name := range names {
-		message, err := Hello(name)
+		message, err := Server(name)
 		if err != nil {
 			return nil, err
 		}

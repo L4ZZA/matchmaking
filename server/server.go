@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	l := log.New(os.Stdout, "products-api ", log.LstdFlags)
+	l := log.New(os.Stdout, "server ", log.LstdFlags)
 
 	// create the handlers
 	ph := handlers.NewProducts(l)
