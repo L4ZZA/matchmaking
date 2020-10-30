@@ -19,11 +19,15 @@ func (s *Sessions) AddSession(rw http.ResponseWriter, r *http.Request) {
 func (s *Sessions) AddPlayer(rw http.ResponseWriter, r *http.Request) {
 
 	player := r.Context().Value(KeyPlayer{}).(data.Player)
+
+	s.l.Println("[DEBUG:POST] Adding player..")
 	err := data.AddPlayer(&player)
 	if(err != nil){
-		s.l.Println("[DEBUG:POST] No Idle session available. Creating new session.. -", err)
 
+		s.l.Println("[DEBUG:POST] No Idle session available. Creating new session..")
 		data.CreateSession()
+
+		s.l.Println("[DEBUG:POST] Retrying to add the player..")
 		err := data.AddPlayer(&player)
 		if(err != nil){
 
@@ -34,5 +38,6 @@ func (s *Sessions) AddPlayer(rw http.ResponseWriter, r *http.Request) {
 		}
 	}
 	rw.WriteHeader(http.StatusOK)
-	data.ToJSON(&GenericSuccessMessage{Message: "Player Added"}, rw)
+	data.ToJSON(&GenericSuccessMessage{Message: "Player Added."}, rw)
+	s.l.Println("[DEBUG:POST] Player Added.")
 }

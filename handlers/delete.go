@@ -16,10 +16,11 @@ func (p *Sessions) RemovePlayer(rw http.ResponseWriter, r *http.Request) {
 
 	err := data.RemovePlayer(sessId, playerId)
 	if err == data.ErrPlayerNotFound {
-		m := fmt.Sprintf("[ERROR:DELETE] Could not delete player id: %d from session id: %d", playerId, sessId)
+		message := fmt.Sprintf("Could not delete player id: %d from session id: %d", playerId, sessId)
+		m := fmt.Sprintf("[ERROR:DELETE] %s", message)
 		p.l.Println(m)
 
-		m = fmt.Sprintf("%s - %s", m, err.Error())
+		m = fmt.Sprintf("%s - %s", message, err.Error())
 		rw.WriteHeader(http.StatusNotFound)
 		data.ToJSON(&GenericError{Message: m}, rw)
 		return
