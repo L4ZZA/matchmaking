@@ -23,10 +23,11 @@ func main() {
 	sm := mux.NewRouter()
 
 	getRouter := sm.Methods("GET").Subrouter()
-	getRouter.HandleFunc("/", ph.GetSessions)
+	getRouter.HandleFunc("/", ph.Greetings)
+	getRouter.HandleFunc("/sessions", ph.GetSessions)
 
 	postRouter := sm.Methods("POST").Subrouter()
-	postRouter.HandleFunc("/", ph.AddSession)
+	postRouter.HandleFunc("/join", ph.AddSession)
 	postRouter.Use(ph.MiddlewareValidateSession)
 
 	// sm.Handle("/", ph)

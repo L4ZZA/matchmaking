@@ -19,6 +19,11 @@ func NewSessions(l *log.Logger) *Sessions {
 	return &Sessions{l}
 }
 
+func (s *Sessions) Greetings(rw http.ResponseWriter, r *http.Request) {
+	s.l.Println("[DEBUG] greet new player")
+	rw.Write([]byte("Thanks for joining THE GAME. Use the handle /join to enter the first available lobby."))
+}
+
 // GetSessions returns the Sessions from the data store
 func (p *Sessions) GetSessions(rw http.ResponseWriter, r *http.Request) {
 	p.l.Println("Handle GET Sessions")
