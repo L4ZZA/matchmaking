@@ -9,6 +9,8 @@ import (
 	"github.com/go-playground/validator"
 )
 
+var ErrSessionNotFound = fmt.Errorf("Session not found")
+
 // Session defines the structure for an API Session
 type Session struct {
 	ID          int     `json:"id"`
@@ -85,6 +87,8 @@ func AddPlayer(p *Player) error {
 	ss.Lobby = append(ss.Lobby, p)
 
 	if(len(ss.Lobby) >= EnoughPlayers){
+		// start game session
+		// TODO: add a a countdown to allow more players to join before the game is "loaded"
 		ss.IsWaiting = false
 	}
 	return nil
@@ -118,8 +122,6 @@ func RemovePlayer(sessionId int, playerId int) error {
 
 	return nil
 }
-
-var ErrSessionNotFound = fmt.Errorf("Session not found")
 
 func findSession(id int) (*Session, int, error) {
 	if(len(SessionList) > 0){

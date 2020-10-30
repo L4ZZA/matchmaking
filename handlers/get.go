@@ -7,16 +7,16 @@ import (
 )
 
 func (s *Sessions) Greetings(rw http.ResponseWriter, r *http.Request) {
-	s.l.Println("Handle GET Greetings")
-	s.l.Println("[DEBUG] greet new player")
+	s.l.Println("[DEBUG:GET] Greet new player")
+	rw.WriteHeader(http.StatusOK)
 	rw.Write([]byte("Thanks for joining THE GAME. Use the handle /join to enter the first available lobby."))
 }
 
 
 // GetSessions returns the Sessions from the data store
 func (s *Sessions) GetSessions(rw http.ResponseWriter, r *http.Request) {
-	s.l.Println("Handle GET Sessions")
 
+	s.l.Println("[DEBUG:GET] GetSessions")
 	// fetch the Sessions from the datastore
 	ss := data.GetSessions()
 
@@ -24,8 +24,8 @@ func (s *Sessions) GetSessions(rw http.ResponseWriter, r *http.Request) {
 	err := ss.ToJSON(rw)
 
 	if err != nil {
-		s.l.Println("GetSessions - Failed to parse to JSON", ss, err)
+		s.l.Println("[ERROR:GET] GetSessions - Failed to parse to JSON", ss, err)
 		http.Error(rw, "Unable to marshal json", http.StatusInternalServerError)
 	}
-	s.l.Println("GetSessions - COMPLETED")
+	s.l.Println("[DEBUG:GET] GetSessions - COMPLETED")
 }

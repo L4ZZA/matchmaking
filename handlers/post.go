@@ -7,30 +7,32 @@ import (
 )
 
 func (s *Sessions) AddSession(rw http.ResponseWriter, r *http.Request) {
-	s.l.Println("[DEBUG] Handle POST Session")
 
 	sess := r.Context().Value(KeySession{}).(data.Session)
 	data.AddSession(&sess)
-	s.l.Println("[DEBUG] AddSession - COMPLETED")
+	s.l.Println("[DEBUG:POST] AddSession - COMPLETED")
+	rw.WriteHeader(http.StatusOK)
+	data.ToJSON(&GenericSuccessMessage{Message: "Session Added"}, rw)
 }
 
 
 func (s *Sessions) AddPlayer(rw http.ResponseWriter, r *http.Request) {
-	s.l.Println("[DEBUG] Handle POST Player")
 
 	player := r.Context().Value(KeyPlayer{}).(data.Player)
 	err := data.AddPlayer(&player)
 	if(err != nil){
-		s.l.Println("[DEBUG] No Idle session available -", err)
-		s.l.Println("[DEBUG] Creating new session")
+		s.l.Println("[DEBUG:POST] No Idle session available. Creating new session.. -", err)
 
 		data.CreateSession()
 		err := data.AddPlayer(&player)
 		if(err != nil){
-			s.l.Println("[ERROR] Player could not be created again -", err)
-			http.Error(rw, "Error reading Player", http.StatusInternalServerError)
+
+			s.l.Println("[ERROR:POST] Player could not be created again -", err)
+			rw.WriteHeader(http.StatusInternalServerError)
+			data.ToJSON(&GenericError{Message: err.Error()}, rw)
 			return
 		}
 	}
-	s.l.Println("[DEBUG] Player added succesfully")
+	rw.WriteHeader(http.StatusOK)
+	data.ToJSON(&GenericSuccessMessage{Message: "Player Added"}, rw)
 }

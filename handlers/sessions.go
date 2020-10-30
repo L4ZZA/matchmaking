@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"github.com/gorilla/mux"
 )
+
 // Sessions is a http.Handler
 type Sessions struct {
 	l *log.Logger
@@ -18,6 +19,15 @@ func NewSessions(l *log.Logger) *Sessions {
 
 type KeySession struct{}
 
+// GenericError is a generic error message returned by a server
+type GenericError struct {
+	Message string `json:"message"`
+}
+
+// GenericSuccessMessage is a generic error message returned by a server
+type GenericSuccessMessage struct {
+	Message string `json:"message"`
+}
 
 // getSessionID returns the Session ID from the URL
 // Panics if cannot convert the id into an integer
