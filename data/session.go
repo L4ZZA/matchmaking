@@ -90,16 +90,57 @@ func AddPlayer(p *Player) error {
 	return nil
 }
 
+
+// RemovePlayer deletes a Player from the database
+func RemovePlayer(sessionId int, playerId int) error {
+
+	s, si, _ := findSession(sessionId)
+	if si == -1 {
+		return ErrSessionNotFound
+	}
+
+	lobbySize := len(s.Lobby)
+	if(lobbySize > 0) {
+		_, pi, _ := findPlayer(playerId, s)
+		if pi == -1 {
+			return ErrPlayerNotFound
+		}
+
+		if(lobbySize == 1){
+			s.Lobby = Players{}
+		} else {
+			s.Lobby = append(s.Lobby[:pi], s.Lobby[pi+1])
+		}
+	} else {
+		return ErrPlayerNotFound
+	}
+
+
+	return nil
+}
+
 var ErrSessionNotFound = fmt.Errorf("Session not found")
 
 func findSession(id int) (*Session, int, error) {
-	for i, s := range SessionList {
-		if s.ID == id {
-			return s, i, nil
+	if(len(SessionList) > 0){
+		for i, s := range SessionList {
+			if s.ID == id {
+				return s, i, nil
+			}
 		}
 	}
 
 	return nil, -1, ErrSessionNotFound
+}
+
+func findPlayer(id int, s *Session) (*Player, int, error) {
+	for i, p := range s.Lobby {
+		if p.ID == id {
+			return p, i, nil
+		}
+	}
+
+	return nil, -1, ErrPlayerNotFound
 }
 
 func findAvailableSession() (*Session, error) {

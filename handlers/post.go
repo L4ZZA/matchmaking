@@ -28,6 +28,7 @@ func (s *Sessions) AddPlayer(rw http.ResponseWriter, r *http.Request) {
 		err := data.AddPlayer(&player)
 		if(err != nil){
 			s.l.Println("[ERROR] Player could not be created again -", err)
+			http.Error(rw, "Error reading Player", http.StatusInternalServerError)
 			return
 		}
 	}

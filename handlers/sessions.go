@@ -1,7 +1,11 @@
 package handlers
 
-import "log"
-
+import (
+	"log"
+	"net/http"
+	"strconv"
+	"github.com/gorilla/mux"
+)
 // Sessions is a http.Handler
 type Sessions struct {
 	l *log.Logger
@@ -14,3 +18,21 @@ func NewSessions(l *log.Logger) *Sessions {
 
 type KeySession struct{}
 
+
+// getSessionID returns the Session ID from the URL
+// Panics if cannot convert the id into an integer
+// this should never happen as the router ensures that
+// this is a valid number
+func getSessionID(r *http.Request) int {
+	// parse the Session id from the url
+	vars := mux.Vars(r)
+
+	// convert the id into an integer and return
+	id, err := strconv.Atoi(vars["session_id"])
+	if err != nil {
+		// should never happen
+		panic(err)
+	}
+
+	return id
+}

@@ -1,12 +1,15 @@
 package data
 
 import (
+	"fmt"
 	"encoding/json"
 	"io"
 
-
 	"github.com/go-playground/validator"
 )
+
+// ErrPlayerNotFound is an error raised when a Player can not be found in the database
+var ErrPlayerNotFound = fmt.Errorf("Player not found")
 
 // Player defines the structure for an API Player
 type Player struct {

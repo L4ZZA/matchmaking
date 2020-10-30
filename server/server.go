@@ -22,15 +22,16 @@ func main() {
 	// create a new serve mux and register the handlers
 	sm := mux.NewRouter()
 
-	getRouter := sm.Methods("GET").Subrouter()
+	getRouter := sm.Methods(http.MethodGet).Subrouter()
 	getRouter.HandleFunc("/", sh.Greetings)
 	getRouter.HandleFunc("/sessions", sh.GetSessions)
 
-	postRouter := sm.Methods("POST").Subrouter()
+	postRouter := sm.Methods(http.MethodPost).Subrouter()
 	postRouter.HandleFunc("/join", sh.AddPlayer)
 	postRouter.Use(sh.MiddlewareValidatePlayer)
 
-	// sm.Handle("/", sh)
+	deleteRouter := sm.Methods(http.MethodDelete).Subrouter()
+	deleteRouter.HandleFunc("/leave/{session_id:[0-9]+}/{player_id:[0-9]+}", sh.RemovePlayer)
 
 	// create a new server
 	s := http.Server{
