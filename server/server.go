@@ -8,7 +8,7 @@ import (
 	"os/signal"
 	"time"
 
-	"example.com/handlers"
+	"github/com/L4ZZA/matchmaking/handlers"
 	"github.com/gorilla/mux"
 )
 

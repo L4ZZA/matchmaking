@@ -1,4 +1,4 @@
-module example.com/data
+module github/com/L4ZZA/matchmaking/data
 
 go 1.15
 

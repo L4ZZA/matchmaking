@@ -7,7 +7,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"example.com/data"
+	"github/com/L4ZZA/matchmaking/data"
+
 	"github.com/gorilla/mux"
 )
 
