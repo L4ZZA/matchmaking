@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github/com/L4ZZA/matchmaking/handlers"
+
 	"github.com/gorilla/mux"
 )
 
@@ -16,21 +17,21 @@ func main() {
 	l := log.New(os.Stdout, "server ", log.LstdFlags)
 
 	// create the handlers
-	ph := handlers.NewProducts(l)
+	ph := handlers.NewSessions(l)
 
 	// create a new serve mux and register the handlers
 	sm := mux.NewRouter()
 
 	getRouter := sm.Methods("GET").Subrouter()
-	getRouter.HandleFunc("/", ph.GetProducts)
+	getRouter.HandleFunc("/", ph.GetSessions)
 
 	putRouter := sm.Methods("PUT").Subrouter()
-	putRouter.HandleFunc("/{id:[0-9]+}", ph.UpdateProducts)
-	putRouter.Use(ph.MiddlewareValidateProduct)
+	putRouter.HandleFunc("/{id:[0-9]+}", ph.UpdateSessions)
+	putRouter.Use(ph.MiddlewareValidateSession)
 
 	postRouter := sm.Methods("POST").Subrouter()
-	postRouter.HandleFunc("/", ph.AddProduct)
-	postRouter.Use(ph.MiddlewareValidateProduct)
+	postRouter.HandleFunc("/", ph.AddSession)
+	postRouter.Use(ph.MiddlewareValidateSession)
 
 	// sm.Handle("/", ph)
 

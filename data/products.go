@@ -9,8 +9,8 @@ import (
 	"github.com/go-playground/validator"
 )
 
-// Product defines the structure for an API product
-type Product struct {
+// Session defines the structure for an API Session
+type Session struct {
 	ID          int    `json:"id"`
 	Name        string `json:"name" validate:"required"`
 	Description string `json:"description"`
@@ -19,18 +19,18 @@ type Product struct {
 	DeletedOn   string `json:"-"`
 }
 
-func (p *Product) FromJSON(r io.Reader) error {
+func (p *Session) FromJSON(r io.Reader) error {
 	e := json.NewDecoder(r)
 	return e.Decode(p)
 }
 
-func (p *Product) Validate() error {
+func (p *Session) Validate() error {
 	validate := validator.New()
 	return validate.Struct(p)
 }
 
-// Products is a collection of Product
-type Products []*Product
+// Sessions is a collection of Session
+type Sessions []*Session
 
 // ToJSON serializes the contents of the collection to JSON
 // NewEncoder provides better performance than json.Unmarshal as it does not
@@ -38,61 +38,61 @@ type Products []*Product
 // this reduces allocations and the overheads of the service
 //
 // https://golang.org/pkg/encoding/json/#NewEncoder
-func (p *Products) ToJSON(w io.Writer) error {
+func (p *Sessions) ToJSON(w io.Writer) error {
 	e := json.NewEncoder(w)
 	return e.Encode(p)
 }
 
-// GetProducts returns a list of products
-func GetProducts() Products {
-	return productList
+// GetSessions returns a list of Sessions
+func GetSessions() Sessions {
+	return SessionList
 }
 
-func AddProduct(p *Product) {
+func AddSession(p *Session) {
 	p.ID = getNextID()
-	productList = append(productList, p)
+	SessionList = append(SessionList, p)
 }
 
-func UpdateProduct(id int, p *Product) error {
-	_, pos, err := findProduct(id)
+func UpdateSession(id int, p *Session) error {
+	_, pos, err := findSession(id)
 	if err != nil {
 		return err
 	}
 
 	p.ID = id
-	productList[pos] = p
+	SessionList[pos] = p
 
 	return nil
 }
 
-var ErrProductNotFound = fmt.Errorf("Product not found")
+var ErrSessionNotFound = fmt.Errorf("Session not found")
 
-func findProduct(id int) (*Product, int, error) {
-	for i, p := range productList {
+func findSession(id int) (*Session, int, error) {
+	for i, p := range SessionList {
 		if p.ID == id {
 			return p, i, nil
 		}
 	}
 
-	return nil, -1, ErrProductNotFound
+	return nil, -1, ErrSessionNotFound
 }
 
 func getNextID() int {
-	lp := productList[len(productList)-1]
+	lp := SessionList[len(SessionList)-1]
 	return lp.ID + 1
 }
 
-// productList is a hard coded list of products for this
+// SessionList is a hard coded list of Sessions for this
 // example data source
-var productList = []*Product{
-	&Product{
+var SessionList = []*Session{
+	&Session{
 		ID:          1,
 		Name:        "Latte",
 		Description: "Frothy milky coffee",
 		CreatedOn:   time.Now().UTC().String(),
 		UpdatedOn:   time.Now().UTC().String(),
 	},
-	&Product{
+	&Session{
 		ID:          2,
 		Name:        "Espresso",
 		Description: "Short and strong coffee without milk",

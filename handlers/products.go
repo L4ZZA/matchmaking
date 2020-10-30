@@ -12,96 +12,96 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// Products is a http.Handler
-type Products struct {
+// Sessions is a http.Handler
+type Sessions struct {
 	l *log.Logger
 }
 
-// NewProducts creates a products handler with the given logger
-func NewProducts(l *log.Logger) *Products {
-	return &Products{l}
+// NewSessions creates a Sessions handler with the given logger
+func NewSessions(l *log.Logger) *Sessions {
+	return &Sessions{l}
 }
 
-// GetProducts returns the products from the data store
-func (p *Products) GetProducts(rw http.ResponseWriter, r *http.Request) {
-	p.l.Println("Handle GET Products")
+// GetSessions returns the Sessions from the data store
+func (p *Sessions) GetSessions(rw http.ResponseWriter, r *http.Request) {
+	p.l.Println("Handle GET Sessions")
 
-	// fetch the products from the datastore
-	lp := data.GetProducts()
+	// fetch the Sessions from the datastore
+	lp := data.GetSessions()
 
 	// serialize the list to JSON
 	err := lp.ToJSON(rw)
 	if err != nil {
-		p.l.Println("GetProducts - Failed to parse to JSON", lp, err)
+		p.l.Println("GetSessions - Failed to parse to JSON", lp, err)
 		http.Error(rw, "Unable to marshal json", http.StatusInternalServerError)
 	}
-	p.l.Println("GetProducts - COMPLETED")
+	p.l.Println("GetSessions - COMPLETED")
 }
 
-func (p *Products) AddProduct(rw http.ResponseWriter, r *http.Request) {
-	p.l.Println("Handle POST Product")
+func (p *Sessions) AddSession(rw http.ResponseWriter, r *http.Request) {
+	p.l.Println("Handle POST Session")
 
-	prod := r.Context().Value(KeyProduct{}).(data.Product)
-	data.AddProduct(&prod)
-	p.l.Println("AddProduct - COMPLETED")
+	prod := r.Context().Value(KeySession{}).(data.Session)
+	data.AddSession(&prod)
+	p.l.Println("AddSession - COMPLETED")
 }
 
-func (p Products) UpdateProducts(rw http.ResponseWriter, r *http.Request) {
+func (p Sessions) UpdateSessions(rw http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
 
 	if err != nil {
-		p.l.Println("UpdateProducts - can't convert id", id, err)
+		p.l.Println("UpdateSessions - can't convert id", id, err)
 		http.Error(rw, "Unable to cast id", http.StatusBadRequest)
 		return
 	}
 
-	p.l.Println("Handle PUT Product", id)
-	prod := r.Context().Value(KeyProduct{}).(data.Product)
+	p.l.Println("Handle PUT Session", id)
+	prod := r.Context().Value(KeySession{}).(data.Session)
 
-	err = data.UpdateProduct(id, &prod)
-	if err == data.ErrProductNotFound {
-		p.l.Println("UpdateProducts - ERROR2 ", err)
-		http.Error(rw, "Product not found", http.StatusNotFound)
+	err = data.UpdateSession(id, &prod)
+	if err == data.ErrSessionNotFound {
+		p.l.Println("UpdateSessions - ERROR2 ", err)
+		http.Error(rw, "Session not found", http.StatusNotFound)
 		return
 	}
 
 	if err != nil {
-		p.l.Println("UpdateProducts - ERROR3")
-		http.Error(rw, "Product not found", http.StatusInternalServerError)
+		p.l.Println("UpdateSessions - ERROR3")
+		http.Error(rw, "Session not found", http.StatusInternalServerError)
 		return
 	}
-	p.l.Println("UpdateProducts - COMPLETED")
+	p.l.Println("UpdateSessions - COMPLETED")
 }
 
-type KeyProduct struct{}
+type KeySession struct{}
 
-func (p Products) MiddlewareValidateProduct(next http.Handler) http.Handler {
+func (p Sessions) MiddlewareValidateSession(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		prod := data.Product{}
+		prod := data.Session{}
 
 		err := prod.FromJSON(r.Body)
 		if err != nil {
-			p.l.Println("[ERROR] deserializing product", err)
-			http.Error(rw, "Error reading product", http.StatusBadRequest)
+			p.l.Println("[ERROR] deserializing Session", err)
+			http.Error(rw, "Error reading Session", http.StatusBadRequest)
 			return
 		}
 
-		// validate the product
+		// validate the Session
 		err = prod.Validate()
 		if err != nil {
-			p.l.Println("[MiddlewareValidateProduct] validating product", err)
+			p.l.Println("[MiddlewareValidateSession] validating Session", err)
 			http.Error(
 				rw,
-				fmt.Sprintf("Error validating product: %s", err),
+				fmt.Sprintf("Error validating Session: %s", err),
 				http.StatusBadRequest,
 			)
 			return
 		}
 
-		// add the product to the context
-		ctx := context.WithValue(r.Context(), KeyProduct{}, prod)
+		// add the Session to the context
+		ctx := context.WithValue(r.Context(), KeySession{}, prod)
 		r = r.WithContext(ctx)
 
 		// Call the next handler, which can be another middleware in the chain, or the final handler.
