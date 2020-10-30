@@ -17,20 +17,20 @@ func main() {
 	l := log.New(os.Stdout, "server ", log.LstdFlags)
 
 	// create the handlers
-	ph := handlers.NewSessions(l)
+	sh := handlers.NewSessions(l)
 
 	// create a new serve mux and register the handlers
 	sm := mux.NewRouter()
 
 	getRouter := sm.Methods("GET").Subrouter()
-	getRouter.HandleFunc("/", ph.Greetings)
-	getRouter.HandleFunc("/sessions", ph.GetSessions)
+	getRouter.HandleFunc("/", sh.Greetings)
+	getRouter.HandleFunc("/sessions", sh.GetSessions)
 
 	postRouter := sm.Methods("POST").Subrouter()
-	postRouter.HandleFunc("/join", ph.AddSession)
-	postRouter.Use(ph.MiddlewareValidateSession)
+	postRouter.HandleFunc("/join", sh.AddPlayer)
+	postRouter.Use(sh.MiddlewareValidatePlayer)
 
-	// sm.Handle("/", ph)
+	// sm.Handle("/", sh)
 
 	// create a new server
 	s := http.Server{
