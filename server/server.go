@@ -25,10 +25,6 @@ func main() {
 	getRouter := sm.Methods("GET").Subrouter()
 	getRouter.HandleFunc("/", ph.GetSessions)
 
-	putRouter := sm.Methods("PUT").Subrouter()
-	putRouter.HandleFunc("/{id:[0-9]+}", ph.UpdateSessions)
-	putRouter.Use(ph.MiddlewareValidateSession)
-
 	postRouter := sm.Methods("POST").Subrouter()
 	postRouter.HandleFunc("/", ph.AddSession)
 	postRouter.Use(ph.MiddlewareValidateSession)

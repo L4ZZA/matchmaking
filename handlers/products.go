@@ -5,11 +5,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 
 	"github/com/L4ZZA/matchmaking/data"
-
-	"github.com/gorilla/mux"
 )
 
 // Sessions is a http.Handler
@@ -44,35 +41,6 @@ func (p *Sessions) AddSession(rw http.ResponseWriter, r *http.Request) {
 	prod := r.Context().Value(KeySession{}).(data.Session)
 	data.AddSession(&prod)
 	p.l.Println("AddSession - COMPLETED")
-}
-
-func (p Sessions) UpdateSessions(rw http.ResponseWriter, r *http.Request) {
-
-	vars := mux.Vars(r)
-	id, err := strconv.Atoi(vars["id"])
-
-	if err != nil {
-		p.l.Println("UpdateSessions - can't convert id", id, err)
-		http.Error(rw, "Unable to cast id", http.StatusBadRequest)
-		return
-	}
-
-	p.l.Println("Handle PUT Session", id)
-	prod := r.Context().Value(KeySession{}).(data.Session)
-
-	err = data.UpdateSession(id, &prod)
-	if err == data.ErrSessionNotFound {
-		p.l.Println("UpdateSessions - ERROR2 ", err)
-		http.Error(rw, "Session not found", http.StatusNotFound)
-		return
-	}
-
-	if err != nil {
-		p.l.Println("UpdateSessions - ERROR3")
-		http.Error(rw, "Session not found", http.StatusInternalServerError)
-		return
-	}
-	p.l.Println("UpdateSessions - COMPLETED")
 }
 
 type KeySession struct{}

@@ -53,18 +53,6 @@ func AddSession(p *Session) {
 	SessionList = append(SessionList, p)
 }
 
-func UpdateSession(id int, p *Session) error {
-	_, pos, err := findSession(id)
-	if err != nil {
-		return err
-	}
-
-	p.ID = id
-	SessionList[pos] = p
-
-	return nil
-}
-
 var ErrSessionNotFound = fmt.Errorf("Session not found")
 
 func findSession(id int) (*Session, int, error) {
