@@ -8,7 +8,8 @@ import (
 	"os/signal"
 	"time"
 
-	"example.com/handlers"
+	"github/com/L4ZZA/matchmaking/handlers"
+
 	"github.com/gorilla/mux"
 )
 
@@ -16,21 +17,21 @@ func main() {
 	l := log.New(os.Stdout, "server ", log.LstdFlags)
 
 	// create the handlers
-	ph := handlers.NewProducts(l)
+	sh := handlers.NewSessions(l)
 
 	// create a new serve mux and register the handlers
 	sm := mux.NewRouter()
 
-	getRouter := sm.Methods("GET").Subrouter()
-	getRouter.HandleFunc("/", ph.GetProducts)
+	getRouter := sm.Methods(http.MethodGet).Subrouter()
+	getRouter.HandleFunc("/", sh.Greetings)
+	getRouter.HandleFunc("/sessions", sh.GetSessions)
 
-	putRouter := sm.Methods("PUT").Subrouter()
-	putRouter.HandleFunc("/{id:[0-9]+}", ph.UpdateProducts)
+	postRouter := sm.Methods(http.MethodPost).Subrouter()
+	postRouter.HandleFunc("/join", sh.AddPlayer)
+	postRouter.Use(sh.MiddlewareValidatePlayer)
 
-	postRouter := sm.Methods("POST").Subrouter()
-	postRouter.HandleFunc("/", ph.AddProduct)
-
-	// sm.Handle("/", ph)
+	deleteRouter := sm.Methods(http.MethodDelete).Subrouter()
+	deleteRouter.HandleFunc("/leave/{player_id:[0-9]+}", sh.RemovePlayer)
 
 	// create a new server
 	s := http.Server{
