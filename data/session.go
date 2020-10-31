@@ -82,13 +82,13 @@ func AddPlayer(p *Player) error {
 	if(err != nil){
 		return err
 	}
-	p.ID = getNextPlayerID()
+	id := getNextPlayerID()
 	p.SessionID = ss.ID
-	ss.Lobby = append(ss.Lobby, p)
+	ss.Lobby[id] = p
 
 	if(len(ss.Lobby) >= EnoughPlayers){
 		// start game session
-		// TODO: add a a countdown to allow more players to join before the game is "loaded"
+		// TODO: defer session activation until lobby is full (100 players) or countdown expires
 		ss.IsWaiting = false
 	}
 	return nil
@@ -109,16 +109,17 @@ func RemovePlayer(sessionId int, playerId int) error {
 		if pi == -1 {
 			return ErrPlayerNotFound
 		}
-
-		if(lobbySize == 1){
-			s.Lobby = Players{}
-		} else {
-			s.Lobby = append(s.Lobby[:pi], s.Lobby[pi+1])
-		}
+		delete(s.Lobby, pi)
+		RemovedIDs = append(RemovedIDs, pi)
 	} else {
 		return ErrPlayerNotFound
 	}
 
+	lobbySize = len(s.Lobby)
+	if(lobbySize < EnoughPlayers){
+		// start game session
+		s.IsWaiting = true
+	}
 
 	return nil
 }
@@ -136,10 +137,9 @@ func findSession(id int) (*Session, int, error) {
 }
 
 func findPlayer(id int, s *Session) (*Player, int, error) {
-	for i, p := range s.Lobby {
-		if p.ID == id {
-			return p, i, nil
-		}
+	// how to check for map elements https://stackoverflow.com/a/2050629/6120464
+	if p, ok := s.Lobby[id]; ok {
+		return p, id, nil
 	}
 
 	return nil, -1, ErrPlayerNotFound
@@ -164,9 +164,22 @@ func getNextPlayerID() int {
 	if(err != nil){
 		return 0
 	}
+
+	idsLeft := len(RemovedIDs)
+	if idsLeft > 0 {
+		// fetch the now available id
+		id := RemovedIDs[idsLeft-1]
+		// remove it from list
+		RemovedIDs = RemovedIDs[:idsLeft-1]
+		// return it
+		return id
+	}
+
 	return len(s.Lobby)
 }
 
 // SessionList is a hard coded list of Sessions for this
 // example data source
 var SessionList = Sessions{}
+// contains a list of all the ids of the removed players
+var RemovedIDs = []int{}

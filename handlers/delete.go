@@ -17,10 +17,9 @@ func (p *Sessions) RemovePlayer(rw http.ResponseWriter, r *http.Request) {
 	err := data.RemovePlayer(sessId, playerId)
 	if err == data.ErrPlayerNotFound {
 		message := fmt.Sprintf("Could not delete player id: %d from session id: %d", playerId, sessId)
-		m := fmt.Sprintf("[ERROR:DELETE] %s", message)
-		p.l.Println(m)
+		p.l.Println(fmt.Sprintf("[ERROR:DELETE] %s", message))
 
-		m = fmt.Sprintf("%s - %s", message, err.Error())
+		m := fmt.Sprintf("%s", message)
 		rw.WriteHeader(http.StatusNotFound)
 		data.ToJSON(&GenericError{Message: m}, rw)
 		return
@@ -35,6 +34,6 @@ func (p *Sessions) RemovePlayer(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	rw.WriteHeader(http.StatusNoContent)
-	data.ToJSON(&GenericSuccessMessage{Message: err.Error()}, rw)
-	p.l.Println("[DEBUG:DELETE] removing player id:", sessId)
+	data.ToJSON(&GenericSuccessMessage{Message: "Player Removed"}, rw)
+	p.l.Println("[DEBUG:DELETE] Player Removed.")
 }

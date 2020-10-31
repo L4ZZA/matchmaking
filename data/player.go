@@ -13,7 +13,6 @@ var ErrPlayerNotFound = fmt.Errorf("Player not found")
 
 // Player defines the structure for an API Player
 type Player struct {
-	ID          int    `json:"id"`
 	Name        string `json:"name" validate:"required"`
 	SessionID   int    `json:"session_id"`
 	CreatedOn   string `json:"-"`
@@ -43,4 +42,4 @@ func (p *Player) ToJSON(w io.Writer) error {
 }
 
 // Players is a collection of Player
-type Players []*Player
+type Players map[int]*Player
