@@ -9,12 +9,19 @@ import (
 	"github.com/go-playground/validator"
 )
 
+// Sessions is a collection of Session
+type Sessions []*Session
+
+const EnoughPlayers int = 4
+const MaxPlayers int = 5
+
 var ErrSessionNotFound = fmt.Errorf("Session not found")
 
 // Session defines the structure for an API Session
 type Session struct {
 	ID          int     `json:"id"`
 	Name        string  `json:"name" validate:"required"`
+	LobbySize   int     `json:"lobby_size"`
 	Lobby 		Players `json:"lobby"`
 	IsWaiting 	bool 	`json:"is_waiting"`
 	CreatedOn   string  `json:"-"`
@@ -43,16 +50,12 @@ func (s *Session) Validate() error {
 	return validate.Struct(s)
 }
 
-// Sessions is a collection of Session
-type Sessions []*Session
-
-const EnoughPlayers int = 4
-
 func New() Session {
 	s:= Session{}
 	s.ID = getNextSessionID()
 	s.Name = fmt.Sprintf("Session%d", s.ID)
 	s.Lobby = Players{}
+	s.LobbySize = 0
 	s.IsWaiting = true
 	s.CreatedOn = time.Now().UTC().String()
 	s.UpdatedOn = time.Now().UTC().String()
@@ -86,9 +89,10 @@ func AddPlayer(p *Player) error {
 	p.ID = id
 	p.SessionID = s.ID
 	s.Lobby[id] = p
+	s.LobbySize++
 	s.UpdatedOn = time.Now().UTC().String()
 
-	if(len(s.Lobby) >= EnoughPlayers){
+	if(s.LobbySize >= EnoughPlayers){
 		// start game session
 		// TODO: defer session activation until lobby is full (100 players) or countdown expires
 		s.IsWaiting = false
@@ -105,23 +109,25 @@ func RemovePlayer(sessionId int, playerId int) error {
 		return ErrSessionNotFound
 	}
 
-	lobbySize := len(s.Lobby)
-	if(lobbySize > 0) {
+	if(s.LobbySize > 0) {
 		_, pi, _ := findPlayer(playerId, s)
 		if pi == -1 {
 			return ErrPlayerNotFound
 		}
 		delete(s.Lobby, pi)
+		s.LobbySize--
 		s.UpdatedOn = time.Now().UTC().String()
-		RemovedIDs = append(RemovedIDs, pi)
+		RemovedPlayesIDs = append(RemovedPlayesIDs, pi)
+		fmt.Println("Removed player - index: ", pi)
 	} else {
 		return ErrPlayerNotFound
 	}
 
-	lobbySize = len(s.Lobby)
-	if(lobbySize < EnoughPlayers){
+
+	if(s.LobbySize < EnoughPlayers){
 		// end game session
 		s.IsWaiting = true
+		fmt.Println("Stopping session - index: ", s.ID)
 		mergeLobbies()
 	}
 
@@ -139,28 +145,40 @@ func mergeLobbies(){
 			if firstAvailableSession == nil {
 				firstAvailableSession = session
 			} else {
-				for _, player := range session.Lobby{
-					player.session_id = firstAvailableSession.ID
-					firstAvailableSession.Lobby[player.ID] = player
-				}
 				indexesToBeDeleted = append(indexesToBeDeleted, session.ID)
+				for _, player := range session.Lobby{
+					player.SessionID = firstAvailableSession.ID
+					firstAvailableSession.Lobby[player.ID] = player
+					firstAvailableSession.LobbySize++
+					if firstAvailableSession.LobbySize == MaxPlayers{
+						fmt.Println("Lobby is full - session: ", firstAvailableSession.ID)
+						// start session
+						firstAvailableSession.IsWaiting = false
+
+						// create new session
+						firstAvailableSession = CreateSession()
+						fmt.Println("New session created id: ", firstAvailableSession.ID)
+					}
+				}
 			}
 		}
 	}
 
 	if len(firstAvailableSession.Lobby) > EnoughPlayers {
 		firstAvailableSession.IsWaiting = false
+		fmt.Println("Starting first available session - index: ", firstAvailableSession.ID)
 	}
 
 	for _, i := range indexesToBeDeleted {
-		// figure out why can't remove from method
+		// TODO: figure out why can't remove from method
 		// removed := remove(i, SessionList)
 		removed := i
 		copy(SessionList[i:], SessionList[i+1:]) // Shift SessionList[i+1:] left one index.
 		last := len(SessionList)-1
 		SessionList[last] = nil     // Erase last element (write zero value).
 		SessionList = SessionList[:last]     // Truncate list.
-		fmt.Println("Removed index: ", removed)
+		RemovedSessionsIDs = append(RemovedSessionsIDs, removed)
+		fmt.Println("Removed session index: ", removed)
 	}
 
 }
@@ -197,7 +215,14 @@ func findAvailableSession() (*Session, error) {
 }
 
 func getNextSessionID() int {
-	return len(SessionList)
+	idsLeft := len(RemovedSessionsIDs)
+	if idsLeft > 0 {
+		id := RemovedSessionsIDs[idsLeft-1]
+		RemovedSessionsIDs = RemovedSessionsIDs[:idsLeft-1]
+		return id
+	}
+	LastUsedSessionID++
+	return LastUsedSessionID
 }
 
 // getNextPlayerID returns the first available id starting from zero.
@@ -205,25 +230,29 @@ func getNextSessionID() int {
 func getNextPlayerID() int {
 	_, err:= findAvailableSession()
 	if(err == nil){
-		idsLeft := len(RemovedIDs)
+		idsLeft := len(RemovedPlayesIDs)
 		if idsLeft > 0 {
-			// fetch the now available id
-			id := RemovedIDs[idsLeft-1]
+			// fetch the last available id in the array
+			id := RemovedPlayesIDs[idsLeft-1]
 			// remove it from list
-			RemovedIDs = RemovedIDs[:idsLeft-1]
+			RemovedPlayesIDs = RemovedPlayesIDs[:idsLeft-1]
 			// return it
 			return id
 		}
 	}
 
-	LastUsedID++
-	return LastUsedID
+	LastUsedPlayerID++
+	return LastUsedPlayerID
 }
 
 // SessionList is a hard coded list of Sessions for this
 // example data source
 var SessionList = Sessions{}
+// contains a list of all the ids of the removed sessions
+var RemovedSessionsIDs = []int{}
 // contains a list of all the ids of the removed players
-var RemovedIDs = []int{}
+var RemovedPlayesIDs = []int{}
 // caching last used id assigned to give a fallback for the id recycling algorithm
-var LastUsedID int = -1
+var LastUsedSessionID int = -1
+// caching last used id assigned to give a fallback for the id recycling algorithm
+var LastUsedPlayerID int = -1
