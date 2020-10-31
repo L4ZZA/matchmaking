@@ -10,7 +10,7 @@ I am assuming that you already [Go](https://golang.org/) installed and wokring
     - `curl localhost:9090/route -XPOST -d '{"json":"data"}'` for POST requests with a boby
     - `curl localhost:9090/route -XDELETE` for DELETE requests.
 
-## Used API
+## User API
 
 The service can be access through three main entry points:
 - `sessions`
