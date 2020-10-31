@@ -78,18 +78,19 @@ func CreateSession() *Session {
 }
 
 func AddPlayer(p *Player) error {
-	ss, err := findAvailableSession()
+	s, err := findAvailableSession()
 	if(err != nil){
 		return err
 	}
 	id := getNextPlayerID()
-	p.SessionID = ss.ID
-	ss.Lobby[id] = p
+	p.SessionID = s.ID
+	s.Lobby[id] = p
+	s.UpdatedOn = time.Now().UTC().String()
 
-	if(len(ss.Lobby) >= EnoughPlayers){
+	if(len(s.Lobby) >= EnoughPlayers){
 		// start game session
 		// TODO: defer session activation until lobby is full (100 players) or countdown expires
-		ss.IsWaiting = false
+		s.IsWaiting = false
 	}
 	return nil
 }
@@ -110,6 +111,7 @@ func RemovePlayer(sessionId int, playerId int) error {
 			return ErrPlayerNotFound
 		}
 		delete(s.Lobby, pi)
+		s.UpdatedOn = time.Now().UTC().String()
 		RemovedIDs = append(RemovedIDs, pi)
 	} else {
 		return ErrPlayerNotFound
