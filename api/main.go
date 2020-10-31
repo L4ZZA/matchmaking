@@ -8,7 +8,7 @@ import (
 	"os/signal"
 	"time"
 
-	"github/com/L4ZZA/matchmaking/handlers"
+	"matchmaking.test/handlers"
 
 	"github.com/gorilla/mux"
 )

@@ -2,12 +2,12 @@ module server
 
 go 1.15
 
-replace github/com/L4ZZA/matchmaking/handlers => ../handlers
+replace matchmaking.test/handlers => ../handlers
 
-replace github/com/L4ZZA/matchmaking/data => ../data
+replace matchmaking.test/data => ../data
 
 require (
 	github.com/gorilla/mux v1.8.0
-	github/com/L4ZZA/matchmaking/data v0.0.0-00010101000000-000000000000
-	github/com/L4ZZA/matchmaking/handlers v0.0.0-00010101000000-000000000000
+	matchmaking.test/data v0.0.0-00010101000000-000000000000
+	matchmaking.test/handlers v0.0.0-00010101000000-000000000000
 )

@@ -1,4 +1,4 @@
-module github/com/L4ZZA/matchmaking/data
+module matchmaking.test/data
 
 go 1.15
 

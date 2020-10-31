@@ -3,7 +3,7 @@ package handlers
 import (
 	"net/http"
 
-	"github/com/L4ZZA/matchmaking/data"
+	"matchmaking.test/data"
 )
 
 func (s *Sessions) Greetings(rw http.ResponseWriter, r *http.Request) {

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github/com/L4ZZA/matchmaking/data"
+	"matchmaking.test/data"
 )
 
 // RemovePlayer handles DELETE requests and removes items from the database

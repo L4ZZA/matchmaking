@@ -5,7 +5,7 @@ import (
 	"context"
 	"net/http"
 
-	"github/com/L4ZZA/matchmaking/data"
+	"matchmaking.test/data"
 )
 
 func (s Sessions) MiddlewareValidatePlayer(next http.Handler) http.Handler {
