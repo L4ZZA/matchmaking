@@ -31,7 +31,7 @@ func main() {
 	postRouter.Use(sh.MiddlewareValidatePlayer)
 
 	deleteRouter := sm.Methods(http.MethodDelete).Subrouter()
-	deleteRouter.HandleFunc("/leave/{session_id:[0-9]+}/{player_id:[0-9]+}", sh.RemovePlayer)
+	deleteRouter.HandleFunc("/leave/{player_id:[0-9]+}", sh.RemovePlayer)
 
 	// create a new server
 	s := http.Server{

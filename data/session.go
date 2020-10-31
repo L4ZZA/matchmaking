@@ -133,6 +133,19 @@ func RemovePlayer(sessionId int, playerId int) error {
 
 	return nil
 }
+
+func GetPlayerFromId(id int) (*Player, error) {
+
+	for _, s := range SessionList{
+		// how to check for map elements https://stackoverflow.com/a/2050629/6120464
+		if p, ok := s.Lobby[id]; ok {
+			return p, nil
+		}
+	}
+
+	return nil, ErrPlayerNotFound
+}
+
 // this method mergess all the sessions awaiting to start and start them
 // if the lobby has reached the minimum amount of players
 func mergeLobbies(){
