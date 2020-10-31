@@ -95,7 +95,7 @@ func AddPlayer(p *Player) error {
 }
 
 
-// RemovePlayer deletes a Player from the database
+// RemovePlayer deletes a Player from the storage
 func RemovePlayer(sessionId int, playerId int) error {
 
 	s, si, _ := findSession(sessionId)
@@ -117,7 +117,7 @@ func RemovePlayer(sessionId int, playerId int) error {
 
 	lobbySize = len(s.Lobby)
 	if(lobbySize < EnoughPlayers){
-		// start game session
+		// end game session
 		s.IsWaiting = true
 	}
 
@@ -159,23 +159,24 @@ func getNextSessionID() int {
 	return len(SessionList)
 }
 
+// getNextPlayerID returns the first available id starting from zero.
+// if the id has been flagged as deleted it gets recycled.
 func getNextPlayerID() int {
-	s, err:= findAvailableSession()
-	if(err != nil){
-		return 0
+	_, err:= findAvailableSession()
+	if(err == nil){
+		idsLeft := len(RemovedIDs)
+		if idsLeft > 0 {
+			// fetch the now available id
+			id := RemovedIDs[idsLeft-1]
+			// remove it from list
+			RemovedIDs = RemovedIDs[:idsLeft-1]
+			// return it
+			return id
+		}
 	}
 
-	idsLeft := len(RemovedIDs)
-	if idsLeft > 0 {
-		// fetch the now available id
-		id := RemovedIDs[idsLeft-1]
-		// remove it from list
-		RemovedIDs = RemovedIDs[:idsLeft-1]
-		// return it
-		return id
-	}
-
-	return len(s.Lobby)
+	LastUsedID++
+	return LastUsedID
 }
 
 // SessionList is a hard coded list of Sessions for this
@@ -183,3 +184,5 @@ func getNextPlayerID() int {
 var SessionList = Sessions{}
 // contains a list of all the ids of the removed players
 var RemovedIDs = []int{}
+// caching last used id assigned to give a fallback for the id recycling algorithm
+var LastUsedID int = -1
