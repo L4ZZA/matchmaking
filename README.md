@@ -4,13 +4,13 @@
 
 
 ## Instructions
-I am assuming that you already [Go](https://golang.org/) installed and wokring
+I am assuming that you already have [Go](https://golang.org/) installed and working on your machine
  - Unzip to a subdirectory of you GOPATH environment variable.
  - Open a terminal\shell inside the _api_ folder.
  - Run `go run main.go` to start the server
  - Use curl to send HTTP requests to the server:
     - `curl localhost:9090/route` for GET requests
-    - `curl localhost:9090/route -XPOST -d '{"json":"data"}'` for POST requests with a boby
+    - `curl localhost:9090/route -XPOST -d '{"json":"data"}'` for POST requests with a body
     - `curl localhost:9090/route -XDELETE` for DELETE requests.
 
 ## User API
