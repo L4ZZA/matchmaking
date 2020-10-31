@@ -1,7 +1,7 @@
 # Matchmaking REST service
 
 ## Preamble
-
+A simple matchmaking-like service written in GO using [gorilla](https://github.com/gorilla/mux) request router.
 
 ## Instructions
 I am assuming that you already have [Go](https://golang.org/) installed and working on your machine
