@@ -67,7 +67,7 @@ func GetSessions() Sessions {
 func AddSession(s *Session) {
 	s.ID = getNextSessionID()
 	s.Name = fmt.Sprintf("Session%d", s.ID)
-	s.Lobby = nil
+	s.Lobby = Players{}
 	SessionList = append(SessionList, s)
 }
 
@@ -83,6 +83,7 @@ func AddPlayer(p *Player) error {
 		return err
 	}
 	id := getNextPlayerID()
+	p.ID = id
 	p.SessionID = s.ID
 	s.Lobby[id] = p
 	s.UpdatedOn = time.Now().UTC().String()
@@ -121,9 +122,47 @@ func RemovePlayer(sessionId int, playerId int) error {
 	if(lobbySize < EnoughPlayers){
 		// end game session
 		s.IsWaiting = true
+		mergeLobbies()
 	}
 
 	return nil
+}
+// this method mergess all the sessions awaiting to start and start them
+// if the lobby has reached the minimum amount of players
+func mergeLobbies(){
+	var firstAvailableSession *Session
+	var indexesToBeDeleted []int
+
+	// pulling all waiting lobbies together under the first available session
+	for _, session := range SessionList {
+		if session.IsWaiting {
+			if firstAvailableSession == nil {
+				firstAvailableSession = session
+			} else {
+				for _, player := range session.Lobby{
+					player.session_id = firstAvailableSession.ID
+					firstAvailableSession.Lobby[player.ID] = player
+				}
+				indexesToBeDeleted = append(indexesToBeDeleted, session.ID)
+			}
+		}
+	}
+
+	if len(firstAvailableSession.Lobby) > EnoughPlayers {
+		firstAvailableSession.IsWaiting = false
+	}
+
+	for _, i := range indexesToBeDeleted {
+		// figure out why can't remove from method
+		// removed := remove(i, SessionList)
+		removed := i
+		copy(SessionList[i:], SessionList[i+1:]) // Shift SessionList[i+1:] left one index.
+		last := len(SessionList)-1
+		SessionList[last] = nil     // Erase last element (write zero value).
+		SessionList = SessionList[:last]     // Truncate list.
+		fmt.Println("Removed index: ", removed)
+	}
+
 }
 
 func findSession(id int) (*Session, int, error) {
